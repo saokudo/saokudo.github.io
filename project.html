@@ -14255,6 +14255,85 @@ a.anchor-link {
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --></head>
+    
+<p><b>Introduction</b></p> <br>
+
+
+<p>In this project, I worked with a team of 4 behavioral scientists to investigate how to properly classify tweets from two prominent politicians: Boris Johnson and Alexandria Ocasio-Cortez (AOC). </p><br>
+
+
+<p>We sought to answer the research question: “How will the Twitter behavior of Boris Johnson and Alexandra Ocasio-Cortez compare and contrast?”. Specifically, we were interested in understanding how the content of the two politicians differ both in content and in scope. We specifically chose to compare these two individuals because, despite both being known widely as politicians, they are reasonably different from each other in their views and, thus, in the topics/opinions that they share on social media.</p><br>
+
+<p>Johnson and Ocasio-Cortez are seen by the public as more than politicians, each has become a personality and a representative of politics in their respective nations and has experienced a great deal of social media attention.</p><br>
+
+<p>Because Twitter offers a platform for a wide variety of topics (political and apolitical), we aimed to understand how these two similar yet very different people used the platform. </p><br>
+
+<p>Below are our methodology, results, and conlusions in more detail: </p><br>
+
+
+<p><b>Methodology:</b></p> <br>
+
+<p>two main steps: (i) a first step in R to get twitter data from our selected users (Boris Johnson and AOC) and (ii) a second step in Python to create the predictive algorithm.  </p><br>
+
+
+(i) Downloading Twitter data in R <br>
+
+<ul>
+  <li> We downloaded 3,200 tweets by Boris Johnson and AOC respectively.  </li> <br>
+  
+  <!-- rnb-chunk-begin -->
+<!-- rnb-output-begin -->
+<pre><code>```{r setup, include=FALSE}
+#recovering tweets from our chosen people: Boris Johnson and AOC
+library(rtweet)
+## select one or more twitter users to lookup
+users <- c("BorisJohnson", "aoc")
+## get users data
+usr_df <- lookup_users(users)
+## view users data
+usr_df
+## view tweet data for these users via tweets_data()
+tweets_data(usr_df)
+bj <- get_timeline("BorisJohnson",  n=3200)
+aoc <- get_timeline("aoc", n=3200)
+```</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+
+  <li>We excluded retweets, keeping only the variables that we were interested in using to develop our algorithm and selected a smaller sample of 200 tweets per user.  </li>
+  <li>We merged these two clean datasets into one in order to create an input file that could be used as an input for our algorithm (see ii). </li>
+  <li>The output from this step is a .csv file including 400 tweets (200 tweets per selected user) </li>
+  <!-- rnb-chunk-begin -->
+<!-- rnb-output-begin -->
+<pre><code>
+```{r pressure, echo=FALSE}
+library(dplyr)
+#selecting only relevant variables ('select')
+#selecting only 200 rows from each person (as in the class exercise)
+bj %>%  filter(is_retweet=="FALSE") %>% 
+  select("screen_name","text") %>%  #, "created_at"
+  head(200) -> bj2
+aoc %>%  filter(is_retweet=="FALSE") %>% 
+  select("screen_name","text") %>%  #, "created_at"
+  head(200) -> aoc2
+#creating one file with tweets from both people
+tweets_hw9 <- union(bj2,aoc2)
+tweets_hw9 %>% mutate(id = row_number()) %>% rename(author = screen_name, status = text) -> tweets_hw9_v0.2
+#write.csv(tweets_hw9_tidy, "~/V/penn/Spring2021/516/")
+write.csv(tweets_hw9_v0.2, file = "tweets_hw9_tidy.csv")
+```</code></pre><br>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+  </ul> 
+
+
+(ii) Creating Algorithm in Python <br>
+<ul>
+  <li> We developed an algorithm that allowed us to predict whether the author of a given tweet was either Boris Johnson or AOC.  </li>
+  <li>The model takes our output from step (i) as an input. The code then splits the data into training and test data, and creates vectorized representations of the tweets  </li>
+</ul> 
+
+  
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
@@ -14377,7 +14456,12 @@ NaiveBayes Count Score:  0.6742424242424242
 
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div>
+<ul>
+  <li>We then compute a few confusion matrices. This will allow us to assess our model later on (see results).  </li>
+  </ul>
+  
+  <div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
@@ -14385,7 +14469,6 @@ NaiveBayes Count Score:  0.6742424242424242
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
 <span class="kn">from</span> <span class="nn">helper_functions</span> <span class="kn">import</span> <span class="n">plot_confusion_matrix</span>
-
 
 <span class="n">tfidf_nb_cm</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">tfidf_nb_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;BorisJohnson&#39;</span><span class="p">,</span> <span class="s1">&#39;AOC&#39;</span><span class="p">])</span>
 <span class="n">count_nb_cm</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">count_nb_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;BorisJohnson&#39;</span><span class="p">,</span> <span class="s1">&#39;AOC&#39;</span><span class="p">])</span>
@@ -14454,7 +14537,10 @@ Confusion matrix, without normalization
 
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div>
+  
+  
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
@@ -14514,7 +14600,9 @@ Confusion matrix, without normalization
 
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div>
+
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
@@ -14595,23 +14683,28 @@ Confusion matrix, without normalization
 
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div>
+<ul>
+  <li>The last few chunks of code allow us to manually test whether an input tweet belongs to one or the other individual. </li>
+  <li>The output from this step is thus an algorithm able to predict whether a given sentence was more likely tweeted by Boris Johnson or AOC. </li>
+  
+  </ul>
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bj_tweet</span> <span class="o">=</span> <span class="s2">&quot;I would like to send my warm wishes to Her Majesty The Queen on her 95th birthday.&quot;</span> 
-<span class="n">aoc_tweet</span> <span class="o">=</span> <span class="s2">&quot;That a family had to lose a son, brother and father; that a teenage girl had to film and post a murder, that millions across the country had to organize and march just for George Floyd to be seen and valued is not justice.&quot;</span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tweet</span> <span class="o">=</span> <span class="s2">&quot;I would like to send my warm wishes to Her Majesty The Queen on her 95th birthday.&quot;</span> 
 
-<span class="n">bj_tweet_vectorized</span> <span class="o">=</span> <span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="n">bj_tweet</span><span class="p">])</span>
-<span class="n">aoc_tweet_vectorized</span> <span class="o">=</span> <span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="n">aoc_tweet</span><span class="p">])</span>
 
-<span class="n">bj_tweet_pred</span> <span class="o">=</span> <span class="n">tfidf_svc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">bj_tweet_vectorized</span><span class="p">)</span>
-<span class="n">aoc_tweet_pred</span> <span class="o">=</span> <span class="n">tfidf_svc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">aoc_tweet_vectorized</span><span class="p">)</span>
+<span class="n">tweet_vectorized</span> <span class="o">=</span> <span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="n">tweet</span><span class="p">])</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted Boris Johnson tweet&quot;</span><span class="p">,</span> <span class="n">bj_tweet_pred</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted AOC tweet&quot;</span><span class="p">,</span> <span class="n">aoc_tweet_pred</span><span class="p">)</span>
+
+<span class="n">tweet_pred</span> <span class="o">=</span> <span class="n">tfidf_svc</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">tweet_vectorized</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted Speaker&quot;</span><span class="p">,</span> <span class="n">tweet_pred</span><span class="p">)</span>
 
 
 <span class="c1">#Tweets for Manual Test</span>
@@ -14677,8 +14770,8 @@ Confusion matrix, without normalization
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Predicted Boris Johnson tweet [&#39;AOC&#39;]
-Predicted AOC tweet [&#39;AOC&#39;]
+<pre>Predicted Speaker [&#39;AOC&#39;]
+Predicted Speaker [&#39;AOC&#39;]
 </pre>
 </div>
 </div>
@@ -14774,19 +14867,44 @@ Predicted AOC tweet [&#39;AOC&#39;]
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
-
      </div>
 </div>
 </div>
 </div>
-
 </div>
+
+<p><b>Results</b></p> <br>
+
+<p>To assess our model, we test it with data that was not included to train the algorithm. We then compute a number of Confusion Matrices and test it with new tweets from the two users as well with tweets from unrelated users.</p> <br>
+
+<p>CFs show algorithm is better at predicting tweets by Boris Johnson compared to those by AOC.
+We see that the model has a better accuracy for predicting BJ tweets than AOC (when comparing the predicted vs true tweet axes). Perhaps this is because AOC uses broader language when she tweets.</p> <br>
+
+
+<p>When testing the model manually, we find that the model is pretty accurate: we test 10 tweets (5 by BJ and 5 by AOC) and we find that the model accurately predicts 7/10 (~70% accuracy).</p> <br>
+
+<p>When we tested Tweets from unrelated users, we found that the model behaves as expected. Because AOC uses a wider spectrum of words, many of the tweets were attributed to her by the algorithm. Even Tweets which contain content which would normally be associated with BJ were attributed to AOC.  In this sense, the model ‘breaks’ when we test it with tweets by unrelated users.</p> <br>
+
+
+<p><b>Conclusions</b></p> <br>
+
+<p>In conclusion, we find that our algorithm is able to predict whether a given tweet was more likely tweeted by Boris Johnson or AOC with an accuracy of about 70%. This is both consistent with the results from the Confusion Matrices and with our manual test.</p> <br>
+
+<p>As postulated, both politicians commonly commented on a key international issue. “COVID” was one of the most used words in tweets from Ocasio-Cortez and “pandemic” was one of Boris Johnson’s most used words. </p> <br>
+
+
+<p>However, there were also considerable differences which allowed our algorithm to predict which user a Tweet came from. For instance, Johnson is prime minister of the UK and so one of the most common words in his tweets is UK. In all likelihood, if a tweet contains “ UK “, it was issued by Johnson. </p> <br>
+
+<p>Interestingly, one of Johnson’s most used words is “great”. While this may not seem significant, the use of the simple adjective in political statements has become a form of statement since Donald Trump adopted the motto “make America great again”. </p> <br>
+
+
+
+<p><b>Acknowledgements </b></p> <br>
+
+<p>This work is the result of a project by Samira Okudo, Nicolle Belaunde, Valentina Cafarelli, Jenifer M. Nemoda, and Jonathan Zur. </p> <br>
+
+<p>The predictive algorithm, on which it is based, is adapted from a model prepared by Alexander Shpenev (https://github.com/shpenev)
+</p> <br>
+
 </body>
-
-
-
-
-
-
-
 </html>
