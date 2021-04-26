@@ -2,3 +2,12 @@
 title: "Project"
 
 ---
+
+```{r setup, include=FALSE}
+setwd 
+
+```
+```{r}
+library(reticulate)
+py_run_file('PythonScript.ipynb')
+```
