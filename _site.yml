@@ -1,12 +1,12 @@
 name: "samiras-website"
 output_dir: "."
 navbar:
-  title: "Samira's Website"
+  title: "Samira Okudo"
   left:
     - text: "Home"
       href: index.html
-    - text: "About Me"
+    - text: "About"
       href: about.html
-    - text: "Project"
+    - text: "Twitter Tet Mining"
       href: project.html
 
