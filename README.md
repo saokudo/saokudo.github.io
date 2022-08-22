@@ -1,4 +1,3 @@
 #saodoku.github.io
-## my personal website
+## Master Project: Twitter Text Mining
 
-This is a test website that will have some things
